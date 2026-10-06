@@ -878,9 +878,9 @@ function floorShadows(){
   const soft=(src,f)=>{const t=document.createElement("canvas");t.width=Math.max(1,Math.round(W/f));t.height=Math.max(1,Math.round(Hh/f));
     const g=t.getContext("2d");g.imageSmoothingEnabled=true;g.drawImage(src,0,0,t.width,t.height);return t;};
   gF.globalCompositeOperation="lighten";gF.imageSmoothingEnabled=true;gF.imageSmoothingQuality="high";
-  gF.globalAlpha=0.28;gF.drawImage(soft(soft(cW,4),3),0,0,W,Hh);
-  gF.globalAlpha=0.42;gF.drawImage(soft(soft(cA,4),4),0,0,W,Hh);
-  gF.globalAlpha=0.7;gF.drawImage(soft(cC,4),0,0,W,Hh);
+  gF.globalAlpha=0.16;gF.drawImage(soft(soft(cW,4),4),0,0,W,Hh);
+  gF.globalAlpha=0.26;gF.drawImage(soft(soft(soft(cA,3),3),3),0,0,W,Hh);
+  gF.globalAlpha=0.38;gF.drawImage(soft(soft(cC,3),2),0,0,W,Hh);
   gF.globalAlpha=1;
   const tex=new THREE.CanvasTexture(cF);
   const m=new THREE.MeshBasicMaterial({color:0x000000,alphaMap:tex,transparent:true,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-2,polygonOffsetUnits:-2});
