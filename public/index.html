@@ -13,7 +13,7 @@
   --accent:#A9652A; --accent-ink:#FFFFFF; --accent-soft:#F3E4D2;
   --floor:#E7E3DF; --grid:#D3CDC7; --wall:#27323A; --window:#7FB3D5; --wb:#A9652A;
   --ok:#2F7D5B; --warn:#B7791F; --bad:#C0392B; --warn-soft:#FBEFD9; --bad-soft:#F8DEDA;
-  --table:#FAFBFB; --table-edge:#27323A; --chair:#D29B5B;
+  --table:#F1DFC0; --table3d:#D9B47E; --table-edge:#27323A; --chair:#D29B5B;
   --bg3d:#E3E7E9; --wall3d:#F3F3EF; --panel3d:#8A5A3A; --floor3d:#8E847E;
   --display:"Barlow Semi Condensed", "Arial Narrow", system-ui, sans-serif;
   --body:"IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
@@ -26,7 +26,7 @@
     --accent:#D8954D; --accent-ink:#1A1208; --accent-soft:#3A2A1A;
     --floor:#24211F; --grid:#35302C; --wall:#C9D2D6; --window:#6FA8CF; --wb:#D8954D;
     --ok:#5BB98C; --warn:#E0A33E; --bad:#EE6B5B; --warn-soft:#3A2E17; --bad-soft:#3E1F1B;
-    --table:#E9ECEC; --table-edge:#0E1316; --chair:#C68A4A;
+    --table:#D8BE93; --table3d:#D9B47E; --table-edge:#0E1316; --chair:#C68A4A;
     --bg3d:#161C1F; --wall3d:#D9DAD5; --panel3d:#6E4630; --floor3d:#5E5752;
   }
 }
@@ -36,7 +36,7 @@
   --accent:#D8954D; --accent-ink:#1A1208; --accent-soft:#3A2A1A;
   --floor:#24211F; --grid:#35302C; --wall:#C9D2D6; --window:#6FA8CF; --wb:#D8954D;
   --ok:#5BB98C; --warn:#E0A33E; --bad:#EE6B5B; --warn-soft:#3A2E17; --bad-soft:#3E1F1B;
-  --table:#E9ECEC; --table-edge:#0E1316; --chair:#C68A4A;
+  --table:#D8BE93; --table3d:#D9B47E; --table-edge:#0E1316; --chair:#C68A4A;
   --bg3d:#161C1F; --wall3d:#D9DAD5; --panel3d:#6E4630; --floor3d:#5E5752;
 }
 *{box-sizing:border-box}
@@ -166,7 +166,7 @@ kbd{font-family:var(--mono);font-size:11px;border:1px solid var(--line);border-b
         <label class="f">Y (m)<input type="number" id="sy" step="0.05"></label>
         <label class="f">Angle (°)<input type="number" id="sr" step="15"></label>
       </div>
-      <label class="f" style="margin-top:10px"><span id="sPcLbl">Poste informatique de cette table</span><select id="sPc"><option value="mixed" hidden disabled>Différent selon les tables</option><option value="">Comme le réglage général</option><option value="tour">Écran + unité centrale</option><option value="aio">Tout-en-un (unité intégrée à l'écran)</option><option value="none">Pas d'ordinateur</option></select></label>
+      <label class="f" style="margin-top:10px"><span id="sPcLbl">Poste informatique de cette table</span><select id="sPc"><option value="mixed" hidden disabled>Différent selon les tables</option><option value="">Comme le réglage général</option><option value="tour">Écran + unité centrale</option><option value="aio">Lenovo Tiny-in-One 22 (mini-PC derrière l'écran)</option><option value="none">Pas d'ordinateur</option></select></label>
       <div class="row" style="margin-top:10px">
         <button id="bRot">Pivoter 90°</button>
         <button id="bDup">Dupliquer</button>
@@ -182,11 +182,13 @@ kbd{font-family:var(--mono);font-size:11px;border:1px solid var(--line);border-b
         <label class="f">Profondeur (cm)<input type="number" id="tD" min="30" max="200" step="5"></label>
         <label class="f">Hauteur (cm)<input type="number" id="tH" min="40" max="120" step="1"></label>
         <label class="f">Places par table<select id="tS"><option>1</option><option>2</option><option>3</option><option>4</option></select></label>
+        <label class="f">Piètement<select id="tL"><option value="4">4 pieds tube rond</option><option value="T">En T</option></select></label>
+        <div class="f" style="justify-content:flex-end"><button id="bModel" class="primary" type="button">Modèle commandé</button></div>
       </div>
       <label class="check"><input type="checkbox" id="chairs"> Afficher les chaises (55 cm de recul)</label>
-      <label class="f" style="margin-top:10px">Poste informatique, réglage général<select id="pcType"><option value="tour">Écran + unité centrale</option><option value="aio">Tout-en-un (unité intégrée à l'écran)</option><option value="none">Pas d'ordinateur</option></select></label>
+      <label class="f" style="margin-top:10px">Poste informatique, réglage général<select id="pcType"><option value="tour">Écran + unité centrale</option><option value="aio">Lenovo Tiny-in-One 22 (mini-PC derrière l'écran)</option><option value="none">Pas d'ordinateur</option></select></label>
       <p class="note">Pour équiper seulement certaines tables en tout-en-un, sélectionnez-les une par une sur le plan.</p>
-      <p class="note">Par défaut : 120 × 60 cm, le nouveau modèle. Les tables actuelles font 140 × 80 cm.</p>
+      <p class="note">« Modèle commandé » : table UGAP Carélie 70 × 50 × 76 cm (hêtre miel, 4 pieds gris alu), chaise Rond'O, Lenovo Tiny-in-One 22 avec clavier Essential et souris MSU1175. Les tables actuelles font 140 × 80 cm.</p>
     </section>
 
     <section class="box">
@@ -256,6 +258,10 @@ kbd{font-family:var(--mono);font-size:11px;border:1px solid var(--line);border-b
             <button data-cam="eye" aria-pressed="false">Depuis l'entrée</button>
             <button data-cam="top" aria-pressed="false">Dessus</button>
           </div>
+          <div class="seg" role="group" aria-label="Qualité du rendu">
+            <button data-q="std" aria-pressed="false" title="Plus fluide sur les ordinateurs modestes">Rapide</button>
+            <button data-q="real" aria-pressed="true" title="Éclairage des dalles LED et des fenêtres, ombres de contact, reflets">Réaliste</button>
+          </div>
         </div>
         <div id="view3d"><div class="msg" id="msg3d">Chargement de la vue 3D…</div></div>
       </section>
@@ -265,6 +271,18 @@ kbd{font-family:var(--mono);font-size:11px;border:1px solid var(--line);border-b
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/environments/RoomEnvironment.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/lights/RectAreaLightUniformsLib.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/geometries/RoundedBoxGeometry.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/math/SimplexNoise.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/SSAOShader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/GammaCorrectionShader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/FXAAShader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/MaskPass.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/SSAOPass.js"></script>
 <script>
 (function(){
 "use strict";
@@ -274,7 +292,7 @@ const fmt=(v,n=2)=>v.toFixed(n).replace(".",",");
 const snap=v=>Math.round(v/0.05)*0.05;
 const CHAIR=0.55;
 
-function defaults(){return {room:{L:7.2,D:5.35,H:2.7,sw:1.7,sd:2.5},table:{w:120,d:60,h:75,seats:2},chairs:true,pcType:"tour",tables:[]};}
+function defaults(){return {room:{L:7.2,D:5.35,H:2.7,sw:1.7,sd:2.5},table:{w:70,d:50,h:76,seats:1,legs:"4"},chairs:true,pcType:"aio",tables:[]};}
 function pcOf(t){return t.pc||S.pcType||(S.pcs===false?"none":"tour");}
 let S; const sel=new Set(); let drag=null, band=null;
 const selTables=()=>S.tables.filter(t=>sel.has(t.id));
@@ -479,7 +497,7 @@ function render2D(){
     let g=`<g class="tbl ${st}${sel.has(t.id)?" sel":""}${drag&&sel.has(t.id)?" drag":""}" data-id="${t.id}" transform="translate(${t.x} ${t.y}) rotate(${t.r})">`;
     if(S.chairs)for(let k=0;k<n;k++){const cx=-w/2+w*(k+0.5)/n;g+=`<rect class="chair" x="${cx-0.21}" y="${d/2+0.07}" width="0.42" height="0.4" rx="0.06"/>`;}
     g+=`<rect class="top" x="${-w/2}" y="${-d/2}" width="${w}" height="${d}" rx="0.015"/>`;
-    {const pt=pcOf(t);if(pt!=="none")for(let k=0;k<n;k++){const cx=-w/2+w*(k+0.5)/n;const pw=pt==="aio"?Math.min(0.54,w/n-0.06):0.34;
+    {const pt=pcOf(t);if(pt!=="none")for(let k=0;k<n;k++){const cx=-w/2+w*(k+0.5)/n;const pw=pt==="aio"?Math.min(0.489,w/n-0.04):0.34;
       g+=`<rect class="pc-${pt}" x="${cx-pw/2}" y="${-d/2+0.06}" width="${pw}" height="${pt==="aio"?0.05:0.08}" rx="0.01"/>`;}}
     g+=`<line class="edge" x1="${-w/2+0.05}" y1="${d/2-0.035}" x2="${w/2-0.05}" y2="${d/2-0.035}"/>`;
     g+=`<text class="num" transform="rotate(${-t.r})">${i+1}</text></g>`;
@@ -532,8 +550,8 @@ const LAY={walls:["les tables sont alignées contre les murs, les élèves tourn
 function aiPrompts(){
   const {w,d,h,n}=tDims();const N=S.tables.length;
   const cT=S.tables.filter(t=>pcOf(t)==="tour").length*n,cA=S.tables.filter(t=>pcOf(t)==="aio").length*n;
-  const pcF=[cT?`${cT} ordinateur${cT>1?"s":""} classique${cT>1?"s":""} (écran noir posé sur une unité centrale compacte noire)`:"",cA?`${cA} ordinateur${cA>1?"s":""} tout-en-un (grand écran noir fin avec l'unité intégrée, pied alu)`:""].filter(Boolean).join(" et ");
-  const pcE=[cT?`${cT} standard computer${cT>1?"s":""} (black monitor on a small black PC)`:"",cA?`${cA} all-in-one computer${cA>1?"s":""} (slim black screen with the PC built in, aluminium stand)`:""].filter(Boolean).join(" and ");
+  const pcF=[cT?`${cT} ordinateur${cT>1?"s":""} classique${cT>1?"s":""} (écran noir posé sur une unité centrale compacte noire)`:"",cA?`${cA} ordinateur${cA>1?"s":""} Lenovo ThinkCentre Tiny-in-One 22 (écran noir 21,5 pouces à bordures fines, pied noir réglable avec le mini-PC logé derrière)`:""].filter(Boolean).join(" et ");
+  const pcE=[cT?`${cT} standard computer${cT>1?"s":""} (black monitor on a small black PC)`:"",cA?`${cA} Lenovo ThinkCentre Tiny-in-One 22 computer${cA>1?"s":""} (black 21.5-inch thin-bezel monitor on an adjustable black stand with the mini PC housed behind it)`:""].filter(Boolean).join(" and ");
   const face={W:0,N:0,E:0,S:0};S.tables.forEach(t=>{const a=t.r*Math.PI/180,fx=Math.sin(a),fy=-Math.cos(a);face[Math.abs(fx)>Math.abs(fy)?(fx<0?"W":"E"):(fy<0?"N":"S")]++;});
   const nmF={W:"le tableau blanc",N:"les fenêtres",E:"la double porte",S:"le mur des deux portes"},nmE={W:"the whiteboard",N:"the windows",E:"the double door",S:"the wall with the two doors"};
   const fF=Object.keys(face).filter(k=>face[k]).map(k=>`${face[k]} table${face[k]>1?"s":""} où les élèves regardent ${nmF[k]}`).join(", ");
@@ -541,10 +559,10 @@ function aiPrompts(){
   const lay=LAY[S.layout]&&!S.layoutMod?LAY[S.layout]:["disposition libre, à reproduire d'après le plan joint","custom layout, follow the attached floor plan"];
   const W=Math.round(w*100),Dd=Math.round(d*100),Hh=Math.round(h*100);
   const fr=`Modifie la photo jointe de cette salle de classe. Garde exactement la pièce telle qu'elle est : même point de vue, mêmes murs, lambris marron et rideaux beiges devant les fenêtres, tableau blanc, affiches, portes, radiateurs, sol gris moucheté, plafond à dalles et éclairage. Enlève tout le mobilier actuel (tables, chaises, ordinateurs). `+
-    `Installe à la place ${N} tables rectangulaires identiques de ${W} × ${Dd} cm (hauteur ${Hh} cm), plateau stratifié blanc à chant noir, piètement métallique gris clair`+(pcF?`, avec ${pcF}, chacun avec clavier et souris, à raison de ${n} poste${n>1?"s":""} par table équipée${cT&&cA?" (voir le plan joint pour savoir quelles tables ont des tout-en-un)":""}`:"")+(S.chairs?`, et ${N*n} chaises d'école en hêtre à dossier ajouré en V et piètement métallique gris`:"")+`. `+
+    `Installe à la place ${N} tables rectangulaires identiques de ${W} × ${Dd} cm (hauteur ${Hh} cm), plateau stratifié hêtre miel à chant assorti, 4 pieds en tube rond gris alu`+(pcF?`, avec ${pcF}, chacun avec un clavier plat noir et une souris filaire noire, à raison de ${n} poste${n>1?"s":""} par table équipée${cT&&cA?" (voir le plan joint pour savoir quelles tables ont des tout-en-un)":""}`:"")+(S.chairs?`, et ${N*n} chaises scolaires Rond'O (assise et dossier galbé en hêtre multiplis, 4 pieds en tube rond gris alu)`:"")+`. `+
     `Disposition : ${lay[0]} (${fF}). La pièce mesure 7,20 m le long des fenêtres, 5,35 m le long du tableau et 2,70 m de haut : respecte cette échelle et garde des passages d'au moins 60 cm. Utilise le plan joint comme référence exacte pour l'emplacement de chaque table. Rendu photographique réaliste, même lumière que la photo d'origine, sans personnes ni texte ajouté.`;
   const en=`Edit the attached photo of this classroom. Keep the room exactly as it is: same camera angle, same walls, brown wood panelling and beige curtains over the windows, whiteboard, posters, doors, radiators, speckled grey floor, tiled ceiling and lighting. Remove all existing furniture (desks, chairs, computers). `+
-    `Replace it with ${N} identical rectangular desks, ${W} × ${Dd} cm (${Hh} cm high), white laminate top with a black edge, light grey metal legs`+(pcE?`, with ${pcE}, each with keyboard and mouse, ${n} per equipped desk${cT&&cA?" (see the attached plan for which desks get all-in-ones)":""}`:"")+(S.chairs?`, and ${N*n} beech wood school chairs with a V-shaped cut-out backrest and grey metal legs`:"")+`. `+
+    `Replace it with ${N} identical rectangular desks, ${W} × ${Dd} cm (${Hh} cm high), honey beech laminate top with a matching edge, 4 round grey aluminium-coloured steel tube legs`+(pcE?`, with ${pcE}, each with a flat black keyboard and a black wired mouse, ${n} per equipped desk${cT&&cA?" (see the attached plan for which desks get all-in-ones)":""}`:"")+(S.chairs?`, and ${N*n} Rond'O school chairs (beech plywood seat and curved backrest, 4 round grey aluminium-coloured tube legs)`:"")+`. `+
     `Layout: ${lay[1]} (${fE}). The room is 7.20 m along the windows, 5.35 m along the whiteboard wall and 2.70 m high: keep that scale and leave aisles of at least 60 cm. Use the attached floor plan as the exact reference for where each desk goes. Photorealistic result, same lighting as the original photo, no people, no added text.`;
   return {fr,en};
 }
@@ -567,7 +585,7 @@ function renderSide(){
 }
 $("#alerts").addEventListener("click",e=>{const li=e.target.closest("li[data-id]");if(li){setSel([+li.dataset.id]);refresh(false);}});
 function syncInputs(){
-  $("#tW").value=S.table.w;$("#tD").value=S.table.d;$("#tH").value=S.table.h;$("#tS").value=S.table.seats;$("#chairs").checked=S.chairs;$("#pcType").value=S.pcType||(S.pcs===false?"none":"tour");
+  $("#tW").value=S.table.w;$("#tD").value=S.table.d;$("#tH").value=S.table.h;$("#tS").value=S.table.seats;$("#tL").value=S.table.legs||"4";$("#chairs").checked=S.chairs;$("#pcType").value=S.pcType||(S.pcs===false?"none":"tour");
   $("#rL").value=S.room.L;$("#rD").value=S.room.D;$("#rH").value=S.room.H;$("#rSW").value=S.room.sw;$("#rSD").value=S.room.sd;
 }
 function refresh(rebuild3d=true){evaluate();render2D();renderSide();save();if(rebuild3d)build3D();else paint3DSel();}
@@ -575,6 +593,8 @@ function refresh(rebuild3d=true){evaluate();render2D();renderSide();save();if(re
 const num_=(id,min,max,def)=>{const v=parseFloat($(id).value);return isFinite(v)?Math.min(max,Math.max(min,v)):def;};
 ["#tW","#tD","#tH","#tS"].forEach(id=>$(id).addEventListener("change",()=>{
   S.table.w=num_("#tW",40,300,130);S.table.d=num_("#tD",30,200,60);S.table.h=num_("#tH",40,120,75);S.table.seats=num_("#tS",1,4,2);syncInputs();refresh();}));
+$("#tL").addEventListener("change",()=>{S.table.legs=$("#tL").value;refresh();});
+$("#bModel").onclick=()=>{S.table={w:70,d:50,h:76,seats:1,legs:"4"};S.chairs=true;S.pcType="aio";syncInputs();refresh();};
 $("#chairs").addEventListener("change",()=>{S.chairs=$("#chairs").checked;refresh();});
 $("#pcType").addEventListener("change",()=>{S.pcType=$("#pcType").value;refresh();});
 $("#sPc").addEventListener("change",()=>{const v=$("#sPc").value;if(v==="mixed")return;selTables().forEach(t=>{if(v)t.pc=v;else delete t.pc;});refresh();});
@@ -627,22 +647,56 @@ const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim
 function init3D(){
   if(typeof THREE==="undefined"||!THREE.OrbitControls){$("#msg3d").textContent="La vue 3D n'a pas pu se charger (bibliothèque 3D indisponible). Le plan reste utilisable.";return false;}
   const wrap=$("#view3d");$("#msg3d").remove();
-  renderer=new THREE.WebGLRenderer({antialias:true});renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+  renderer=new THREE.WebGLRenderer({antialias:true});renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,1.75));
   renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
   wrap.appendChild(renderer.domElement);
-  scene=new THREE.Scene();camera=new THREE.PerspectiveCamera(50,1,0.05,120);
+  scene=new THREE.Scene();camera=new THREE.PerspectiveCamera(50,1,0.1,120);
   controls=new THREE.OrbitControls(camera,renderer.domElement);controls.maxPolarAngle=Math.PI*0.495;controls.minDistance=0.5;controls.maxDistance=40;
   controls.addEventListener("change",render3D);
-  scene.add(new THREE.HemisphereLight(0xffffff,0x8a8078,0.75));
+  const hemi=new THREE.HemisphereLight(0xffffff,0x8a8078,0.75);scene.add(hemi);scene.userData.hemi=hemi;
+  if(canReal()){try{THREE.RectAreaLightUniformsLib.init();const pm=new THREE.PMREMGenerator(renderer);envTex=pm.fromScene(new THREE.RoomEnvironment(),0.04).texture;pm.dispose();}catch(e){envTex=null;}}
   const sun=new THREE.DirectionalLight(0xffffff,0.55);sun.position.set(3,8,-4);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);
   const sc=sun.shadow.camera;sc.left=-10;sc.right=10;sc.top=10;sc.bottom=-10;sc.near=0.5;sc.far=30;scene.add(sun);scene.add(sun.target);scene.userData.sun=sun;
   group=new THREE.Group();scene.add(group);
   new ResizeObserver(resize3D).observe(wrap);
   return true;
 }
-function resize3D(){if(!renderer)return;const w=$("#view3d").clientWidth,h=$("#view3d").clientHeight;if(!w||!h)return;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();render3D();}
+function resize3D(){if(!renderer)return;const w=$("#view3d").clientWidth,h=$("#view3d").clientHeight;if(!w||!h)return;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();
+  if(composer){composer.setSize(w,h);const pr=renderer.getPixelRatio();fxaa.uniforms.resolution.value.set(1/(w*pr),1/(h*pr));}render3D();}
+/* qualité du rendu : « Réaliste » = couleurs physiques, éclairage par les dalles LED et les fenêtres, reflets, occlusion ambiante */
+let quality=(()=>{try{return localStorage.getItem("salle-info-qualite")||"real";}catch(e){return "real";}})();
+let envTex=null,composer=null,ssao=null,fxaa=null;
+function canReal(){return !!(window.THREE&&THREE.RoomEnvironment&&THREE.RectAreaLightUniformsLib&&THREE.EffectComposer&&THREE.SSAOPass&&THREE.ShaderPass&&THREE.GammaCorrectionShader&&THREE.FXAAShader);}
+function REAL(){return quality==="real"&&!!envTex;}
+function lin(c){const k=new THREE.Color(c);return REAL()?k.convertSRGBToLinear():k;}
+function setupComposer(){
+  if(composer||!REAL())return;
+  try{const w=$("#view3d").clientWidth||800,h=$("#view3d").clientHeight||500;
+    composer=new THREE.EffectComposer(renderer);
+    ssao=new THREE.SSAOPass(scene,camera,w,h);ssao.kernelRadius=0.5;ssao.minDistance=0.0015;ssao.maxDistance=0.08;composer.addPass(ssao);
+    composer.addPass(new THREE.ShaderPass(THREE.GammaCorrectionShader));
+    fxaa=new THREE.ShaderPass(THREE.FXAAShader);composer.addPass(fxaa);composer.setSize(w,h);
+    const pr=renderer.getPixelRatio();fxaa.uniforms.resolution.value.set(1/(w*pr),1/(h*pr));
+  }catch(e){composer=null;}
+}
+function applyQuality(){
+  if(!renderer)return;const R=REAL();
+  renderer.toneMapping=R?THREE.ACESFilmicToneMapping:THREE.NoToneMapping;renderer.toneMappingExposure=R?0.82:1;
+  renderer.outputEncoding=R?THREE.sRGBEncoding:THREE.LinearEncoding;
+  renderer.shadowMap.type=R?THREE.PCFShadowMap:THREE.PCFSoftShadowMap;renderer.shadowMap.needsUpdate=true;
+  scene.environment=R?envTex:null;camera.far=R?45:120;camera.updateProjectionMatrix();
+  if(R)setupComposer();
+  document.querySelectorAll("[data-q]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.q===(R?"real":"std")));
+  build3D();resize3D();
+}
+document.querySelectorAll("[data-q]").forEach(b=>b.onclick=()=>{quality=b.dataset.q;try{localStorage.setItem("salle-info-qualite",quality);}catch(e){}
+  applyQuality();});
 function disposeGroup(){group.traverse(o=>{if(o.geometry)o.geometry.dispose();});while(group.children.length)group.remove(group.children[0]);walls=[];tableMeshes=[];ceilGroup=null;}
-function mat(c,o={}){return new THREE.MeshStandardMaterial(Object.assign({color:new THREE.Color(c),roughness:0.8,metalness:0},o));}
+function mat(c,o={},Phys){const m=new (Phys?THREE.MeshPhysicalMaterial:THREE.MeshStandardMaterial)(Object.assign({roughness:0.8,metalness:0},o));
+  m.color=lin(c);if(o.emissive!==undefined)m.emissive=lin(o.emissive);
+  if(REAL())m.envMapIntensity=o.envMapIntensity??0.45;const enc=REAL()?THREE.sRGBEncoding:THREE.LinearEncoding;if(m.map)m.map.encoding=enc;if(m.emissiveMap)m.emissiveMap.encoding=enc;return m;}
+function rboxMesh(w,h,d,r,m,x,y,z){const b=new THREE.Mesh(rbox(w,h,d,r),m);b.position.set(x,y,z);b.castShadow=true;b.receiveShadow=true;return b;}
+function rbox(w,h,d,r){return (REAL()&&THREE.RoundedBoxGeometry)?new THREE.RoundedBoxGeometry(w,h,d,2,Math.min(r,h/2-0.0005,w/2,d/2)):new THREE.BoxGeometry(w,h,d);}
 function box(w,h,d,m,x,y,z,cast=true){const b=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m);b.position.set(x,y,z);b.castShadow=cast;b.receiveShadow=true;return b;}
 /* textures dessinées (aucune image externe) */
 const TX={};
@@ -660,17 +714,32 @@ function initTextures(){
   ctex("rad",64,64,(g,w,h)=>{g.fillStyle="#F2F1EB";g.fillRect(0,0,w,h);g.fillStyle="#C9C8C0";for(let x=0;x<w;x+=6)g.fillRect(x,0,2,h);});
   ctex("ceil",256,256,(g,w,h)=>{g.fillStyle="#E8E8E2";g.fillRect(0,0,w,h);for(let i=0;i<3000;i++){g.fillStyle=rnd()<.5?"#D9D9D2":"#F2F2EE";g.fillRect(rnd()*w,rnd()*h,1.5,1.5);}
     g.strokeStyle="#B9B9B0";g.lineWidth=4;g.strokeRect(0,0,w,h);});
+  ctex("paint",256,256,(g,w,h)=>{g.fillStyle="#F4F4F1";g.fillRect(0,0,w,h);for(let i=0;i<5000;i++){const v=236+Math.floor(rnd()*14);g.fillStyle=`rgb(${v},${v},${v-3})`;g.fillRect(rnd()*w,rnd()*h,2,2);}});
+  ctex("beech",256,256,(g,w,h)=>{for(let y=0;y<h;y++){const k=0.9+0.07*Math.sin(y*0.35+Math.sin(y*0.05)*4)+0.03*rnd();g.fillStyle=`rgb(${Math.round(214*k)},${Math.round(156*k)},${Math.round(96*k)})`;g.fillRect(0,y,w,1);}});
+  ctex("beechTop",512,512,(g,w,h)=>{for(let y=0;y<h;y++){const k=0.93+0.035*Math.sin(y*0.21+Math.sin(y*0.031)*5)+0.02*rnd();g.fillStyle=`rgb(${Math.round(226*k)},${Math.round(184*k)},${Math.round(128*k)})`;g.fillRect(0,y,w,1);}
+    for(let i=0;i<600;i++){g.fillStyle=`rgba(150,100,50,${0.05+rnd()*0.06})`;g.fillRect(rnd()*w,rnd()*h,20+rnd()*60,1);}});
+  ctex("keys",512,160,(g,w,h)=>{g.fillStyle="#0c0d0e";g.fillRect(0,0,w,h);g.fillStyle="#2a2d30";const kw=w/22.5;
+    const row=(y,hh,xs)=>xs.forEach(([x,ww])=>{g.fillRect(x*kw+2,y,ww*kw-4,hh);});
+    for(let r=0;r<6;r++){const y=6+r*25,hh=r?20:14;const xs=[];let x=0.3;const cnt=r?14:13;for(let i=0;i<cnt;i++){xs.push([x,r===5&&i===4?5:1]);x+=r===5&&i===4?5:1;}row(y,hh,xs);
+      const nx=[];for(let i=0;i<3;i++)nx.push([15.3+i,1]);if(r)row(y,hh,nx);const np=[];for(let i=0;i<4;i++)np.push([18.6+i,1]);if(r)row(y,hh,np);}});
+  ctex("floorR",256,256,(g,w,h)=>{g.fillStyle="#777";g.fillRect(0,0,w,h);for(let i=0;i<4000;i++){const v=90+Math.floor(rnd()*70);g.fillStyle=`rgb(${v},${v},${v})`;g.fillRect(rnd()*w,rnd()*h,3,3);}});
   ctex("chairback",128,128,(g,w,h)=>{g.fillStyle="#000";g.fillRect(0,0,w,h);g.fillStyle="#fff";g.beginPath();g.moveTo(2,4);g.quadraticCurveTo(64,22,126,4);g.lineTo(112,70);g.quadraticCurveTo(92,110,80,126);g.lineTo(48,126);g.quadraticCurveTo(36,110,16,70);g.closePath();g.fill();
     g.fillStyle="#000";g.beginPath();g.moveTo(44,30);g.lineTo(84,30);g.lineTo(64,70);g.closePath();g.fill();});
 }
 function build3D(){
   if(!renderer)return;disposeGroup();if(!TX.floor)initTextures();
   const {L,D,H,sw,sd}=S.room;const F=feats();const xb=L-sw;
-  scene.background=new THREE.Color(css("--bg3d"));
-  const sun=scene.userData.sun;sun.position.set(L/2+2,9,-3);sun.target.position.set(L/2,0,D/2);
+  const R=REAL();scene.background=lin(css("--bg3d"));
+  const sun=scene.userData.sun;scene.userData.hemi.intensity=R?0.06:0.75;
+  if(R){sun.intensity=0.32;sun.color.set(0xfff6ea);sun.position.set(L/2+1.2,9,D/2+2.2);sun.shadow.radius=5;sun.shadow.bias=-0.0004;}
+  else{sun.intensity=0.55;sun.color.set(0xffffff);sun.position.set(L/2+2,9,-3);sun.shadow.radius=1;sun.shadow.bias=0;}
+  sun.target.position.set(L/2,0,D/2);
+  if(R){ // dalles LED du plafond et lumière du jour derrière les rideaux
+    [[1.5,1.5],[1.5,3.9],[3.9,1.5],[3.9,3.9],[6.0,1.5],[6.0,3.9]].forEach(([x,y])=>{if(x<L-0.4&&y<D-0.4){const a=new THREE.RectAreaLight(0xfff8f0,9,0.58,0.58);a.position.set(x,H-0.02,y);a.lookAt(x,0,y);group.add(a);}});
+    const wa=F.win.a,wb2=F.win.b;const day=new THREE.RectAreaLight(0xffeccc,2.2,wb2-wa,1.4);day.position.set((wa+wb2)/2,1.65,0.16);day.lookAt((wa+wb2)/2,1.4,4);group.add(day);}
   // sol
   const shp=new THREE.Shape();poly().forEach((p,i)=>i?shp.lineTo(p[0],-p[1]):shp.moveTo(p[0],-p[1]));
-  const fl=new THREE.Mesh(new THREE.ShapeGeometry(shp),mat(0xffffff,{map:rep(TX.floor,1,1),roughness:0.35}));fl.rotation.x=-Math.PI/2;fl.receiveShadow=true;group.add(fl);
+  const fl=new THREE.Mesh(new THREE.ShapeGeometry(shp),R?mat(0xffffff,{map:rep(TX.floor,1,1),roughness:0.7,roughnessMap:rep(TX.floorR,1,1),clearcoat:0.18,clearcoatRoughness:0.3,envMapIntensity:0.35},true):mat(0xffffff,{map:rep(TX.floor,1,1),roughness:0.35}));fl.rotation.x=-Math.PI/2;fl.receiveShadow=true;group.add(fl);
   // plafond (visible seulement quand la caméra est dans la pièce)
   ceilGroup=new THREE.Group();
   const shc=new THREE.Shape();poly().forEach((p,i)=>i?shc.lineTo(p[0],p[1]):shc.moveTo(p[0],p[1]));
@@ -687,7 +756,8 @@ function build3D(){
   for(const s of wallSegs()){
     const o=outward(s);const g=new THREE.Group();const ang=-Math.atan2(o.u[1],o.u[0]);
     const T=(m)=>{m.transparent=true;return m;};
-    const wallMat=(len,hh)=>s.panel?T(mat(0xffffff,{map:rep(TX.panel,len,hh),roughness:0.7})):T(mat(white,{roughness:0.9}));
+    const wallMat=(len,hh)=>s.panel?T(mat(0xffffff,R?{map:rep(TX.panel,len,hh),bumpMap:rep(TX.panel,len,hh),bumpScale:0.004,roughness:0.65}:{map:rep(TX.panel,len,hh),roughness:0.7}))
+      :T(mat(white,R?{map:rep(TX.paint,len,hh),roughness:0.92}:{roughness:0.9}));
     const wp=(a,off)=>[s.p[0]+o.u[0]*a+o.n[0]*off,s.p[1]+o.u[1]*a+o.n[1]*off];
     const place=(a,b,y0,y1,m,th=0.1,inset=0.05)=>{if(b-a<0.001||y1-y0<0.001)return null;const c=(a+b)/2;const [x,z]=wp(c,inset);
       const mesh=box(b-a,y1-y0,th,m,x,(y0+y1)/2,z,false);mesh.rotation.y=ang;g.add(mesh);return mesh;};
@@ -723,7 +793,7 @@ function build3D(){
       if(!op)deco(a,b,0,0.08,T(mat(0x9DB0B8)),0.012);}
     // affiches et objets propres à chaque mur (d'après les photos)
     const poster=(a,y,w,h,col)=>{deco(a-w/2,a+w/2,y-h/2,y+h/2,T(mat(0x151515,{roughness:0.6})),0.006);
-      const m=deco(a-w/2+0.03,a+w/2-0.03,y-h/2+0.05,y+h/2-0.03,T(mat(col,{roughness:0.55})),0.008);};
+      const m=deco(a-w/2+0.03,a+w/2-0.03,y-h/2+0.05,y+h/2-0.03,T(mat(col,{roughness:0.55})),0.014);};
     if(s.id==="W"){const A=y=>D-y;
       const wbA=A(F.wb.b),wbB=A(F.wb.a);deco(wbA-0.03,wbB+0.03,1.04,2.1,T(mat(0xA7AEB2,{metalness:0.4,roughness:0.4})),0.02);deco(wbA,wbB,1.07,2.07,T(mat(0xFCFCFA,{roughness:0.15})),0.03);
       deco(wbA+0.1,wbB-0.1,1.02,1.05,metal,0.07);
@@ -742,56 +812,81 @@ function build3D(){
   }
   // radiateurs à ailettes
   F.rads.forEach(r=>{const w=r.b-r.a;group.add(box(w,0.6,0.09,mat(0xffffff,{map:rep(TX.rad,w*6,1),roughness:0.5}),(r.a+r.b)/2,0.45,0.07));});
-  // tables, chaises, postes
-  const {w,d,h,n}=tDims();
-  const mTop=mat(css("--table"),{roughness:0.45}),mEdge=mat(0x1E2226),mLeg=mat(0xD9DCDD,{metalness:0.35,roughness:0.4}),mCl=mat(0xC4C8CA,{metalness:0.35,roughness:0.45});
-  const mCh=mat(0xC98B4E,{roughness:0.55}),mBack=mat(0xC98B4E,{roughness:0.55,alphaMap:TX.chairback,alphaTest:0.5,side:THREE.DoubleSide});
-  const mBlk=mat(0x17191B,{roughness:0.5}),mScr=mat(0x0B0D0F,{roughness:0.2,metalness:0.2}),mAlu=mat(0xC9CDD0,{metalness:0.6,roughness:0.3});
-  const gTop=new THREE.BoxGeometry(w,0.026,d),gEdge=new THREE.BoxGeometry(w+0.01,0.014,d+0.01);
-  const gPost=new THREE.BoxGeometry(0.06,h-0.03,0.04),gFoot=new THREE.BoxGeometry(0.05,0.04,Math.max(0.2,d*0.95));
-  const gSeat=new THREE.BoxGeometry(0.42,0.025,0.40),gBack=new THREE.PlaneGeometry(0.44,0.44),gCl=new THREE.BoxGeometry(0.02,0.46,0.02);
+  // tables, chaises, postes (modèles commandés : table UGAP Carélie, chaise Rond'O, Lenovo Tiny-in-One 22 Gen 3)
+  const {w,d,h,n}=tDims();const legs=S.table.legs||"4";
+  const topOk=R?"#ffffff":css("--table3d");
+  const mTop=mat(topOk,R?{map:rep(TX.beechTop,w/0.7,d/0.5),roughness:0.42}:{roughness:0.45}),mEdge=mat(R?"#C79A62":"#C9A26E",{roughness:0.5});
+  const mLeg=mat(0xB9BDC0,{metalness:0.55,roughness:0.38}),mFoot=mat(0x26292B,{roughness:0.7});
+  const mCh=mat(R?0xffffff:0xC98B4E,R?{map:rep(TX.beech,1,1),roughness:0.48}:{roughness:0.5});
+  const mChBack=mat(R?0xffffff:0xC98B4E,R?{map:rep(TX.beech,1,1),roughness:0.48,side:THREE.DoubleSide}:{roughness:0.5,side:THREE.DoubleSide});
+  const mBlk=mat(0x1A1C1E,{roughness:0.55}),mBlkMat=mat(0x111213,{roughness:0.8}),mScr=mat(0x07090B,{roughness:0.12,metalness:0.1}),mKeys=mat(0xffffff,{map:TX.keys,roughness:0.6});
+  if(mKeys.map)mKeys.map.encoding=R?THREE.sRGBEncoding:THREE.LinearEncoding;
+  const gTop=rbox(w,0.021,d,0.004);
+  // tube entre deux points
+  const tube=(g,m,a,b,r)=>{const A=new THREE.Vector3(...a),B=new THREE.Vector3(...b);const L=A.distanceTo(B);const c=new THREE.Mesh(new THREE.CylinderGeometry(r,r,L,14),m);
+    c.position.copy(A).add(B).multiplyScalar(0.5);c.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),B.clone().sub(A).normalize());c.castShadow=true;g.add(c);return c;};
+  const gBackRond=(()=>{const rr=0.42,bw=0.40;return new THREE.CylinderGeometry(rr,rr,0.2,24,1,true,-bw/(2*rr),bw/rr);})();
+  const gMouse=new THREE.SphereGeometry(1,20,14,0,Math.PI*2,0,Math.PI/2);
   S.tables.forEach(t=>{
     const tg=new THREE.Group();tg.position.set(t.x,0,t.y);tg.rotation.y=-t.r*Math.PI/180;
-    const top=new THREE.Mesh(gTop,mTop.clone());top.position.y=h-0.013;top.castShadow=top.receiveShadow=true;tg.add(top);
-    const ed=new THREE.Mesh(gEdge,mEdge);ed.position.y=h-0.027;tg.add(ed);
-    [-1,1].forEach(sg=>{const px=sg*(w/2-Math.min(0.1,w*0.12));const p=new THREE.Mesh(gPost,mLeg);p.position.set(px,(h-0.03)/2,-0.05);p.castShadow=true;tg.add(p);
-      const f=new THREE.Mesh(gFoot,mLeg);f.position.set(px,0.02,0);f.castShadow=true;tg.add(f);
-      tg.add(box(0.06,0.03,d*0.8,mLeg,px,h-0.05,0,false));});
-    tg.add(box(w-0.25,0.05,0.02,mLeg,0,h-0.08,-d/2+0.06,false));
-    for(let k=0;k<n;k++){const cx=-w/2+w*(k+0.5)/n;
-      const pt=pcOf(t);const kz=Math.min(d/2-0.1,-d/2+0.44);
-      if(pt==="aio"){const aw=Math.min(0.54,w/n-0.06);
-        tg.add(box(0.2,0.01,0.17,mAlu,cx,h+0.005,-d/2+0.16,false));tg.add(box(0.05,0.16,0.02,mAlu,cx,h+0.09,-d/2+0.11,false));
-        const body=box(aw,0.4,0.045,mBlk,cx,h+0.33,-d/2+0.14);body.rotation.x=-0.08;tg.add(body);
-        const sc=box(aw-0.02,0.31,0.004,mScr,cx,h+0.355,-d/2+0.165,false);sc.rotation.x=-0.08;tg.add(sc);
-        tg.add(box(0.44,0.02,0.14,mBlk,cx,h+0.01,kz,false));tg.add(box(0.06,0.02,0.1,mBlk,cx+0.3,h+0.01,kz,false));}
+    const top=new THREE.Mesh(gTop,mTop.clone());top.position.y=h-0.0105;top.castShadow=top.receiveShadow=true;tg.add(top);
+    tg.add(box(w-0.004,0.019,d-0.004,mEdge,0,h-0.0105,0,false)); // chant assorti (visible sur la tranche)
+    if(legs==="4"){ // 4 pieds tube rond Ø50, vérins noirs, cadre sous plateau
+      const ix=w/2-0.05,iz=d/2-0.05;
+      [[-ix,-iz],[ix,-iz],[-ix,iz],[ix,iz]].forEach(([x,z])=>{tube(tg,mLeg,[x,0.014,z],[x,h-0.021,z],0.025);
+        const v=new THREE.Mesh(new THREE.CylinderGeometry(0.022,0.024,0.014,14),mFoot);v.position.set(x,0.007,z);tg.add(v);});
+      [[-ix,ix,-iz],[-ix,ix,iz]].forEach(([a,b,z])=>tg.add(box(b-a,0.03,0.02,mLeg,0,h-0.036,z,false)));
+      [[-ix],[ix]].forEach(([x])=>tg.add(box(0.02,0.03,2*iz,mLeg,x,h-0.036,0,false)));
+    }else{ // piètement en T
+      [-1,1].forEach(sg=>{const px=sg*(w/2-Math.min(0.1,w*0.12));tg.add(box(0.06,h-0.03,0.04,mLeg,px,(h-0.03)/2,-0.05));
+        tg.add(box(0.05,0.04,Math.max(0.2,d*0.95),mLeg,px,0.02,0));tg.add(box(0.06,0.03,d*0.8,mLeg,px,h-0.05,0,false));});
+      tg.add(box(w-0.25,0.05,0.02,mLeg,0,h-0.08,-d/2+0.06,false));}
+    for(let k=0;k<n;k++){const cx=-w/2+w*(k+0.5)/n;const pt=pcOf(t);const slot=w/n;
+      const kz=d/2-0.095,kw=Math.min(0.424,slot-0.12);
+      if(pt!=="none"){ // clavier plat Lenovo Essential 424×146×20 mm + souris MSU1175
+        tg.add(box(kw,0.016,0.146,mBlk,cx-0.03,h+0.008,kz,false));
+        const kt=new THREE.Mesh(new THREE.PlaneGeometry(kw-0.01,0.136),mKeys);kt.rotation.x=-Math.PI/2;kt.position.set(cx-0.03,h+0.0165,kz);tg.add(kt);
+        const ms=new THREE.Mesh(gMouse,mBlk);ms.scale.set(0.031,0.036,0.057);ms.position.set(Math.min(cx+kw/2+0.04,cx+slot/2-0.04),h,kz);ms.castShadow=true;tg.add(ms);}
+      if(pt==="aio"){ // Lenovo ThinkCentre Tiny-in-One 22 Gen 3 : dalle 21,5" 489×339 mm, bordures 2 mm, menton 22 mm, pied réglable, Tiny PC logé derrière
+        const sw2=Math.min(0.489,slot-0.04),sh=0.339*sw2/0.489,zb=-d/2+0.12,bottom=h+0.075;
+        tg.add(rboxMesh(0.24,0.012,0.2,0.01,mBlk,cx,h+0.006,zb));
+        tg.add(box(0.075,0.3,0.035,mBlk,cx,h+0.16,zb-0.06));
+        tg.add(box(0.2,0.2,0.05,mBlkMat,cx,h+0.17,zb-0.025)); // logement du Tiny PC
+        tg.add(rboxMesh(sw2,sh,0.022,0.004,mBlk,cx,bottom+sh/2,zb+0.012));
+        tg.add(box(sw2*0.62,sh*0.6,0.03,mBlk,cx,bottom+sh*0.52,zb-0.012));
+        tg.add(box(sw2-0.004,sh-0.024,0.002,mScr,cx,bottom+0.022+(sh-0.024)/2,zb+0.024,false));}
       else if(pt==="tour"){
         tg.add(box(0.29,0.085,0.3,mBlk,cx,h+0.043,-d/2+0.19));
         tg.add(box(0.2,0.012,0.16,mBlk,cx,h+0.092,-d/2+0.2,false));tg.add(box(0.04,0.13,0.03,mBlk,cx,h+0.16,-d/2+0.19,false));
-        tg.add(box(0.4,0.33,0.035,mBlk,cx,h+0.36,-d/2+0.17));const sc=box(0.36,0.29,0.004,mScr,cx,h+0.36,-d/2+0.19,false);tg.add(sc);
-        tg.add(box(0.44,0.02,0.14,mBlk,cx,h+0.01,Math.min(d/2-0.1,-d/2+0.44),false));tg.add(box(0.06,0.02,0.1,mBlk,cx+0.3,h+0.01,Math.min(d/2-0.1,-d/2+0.44),false));}
-      if(S.chairs){const cz=d/2+0.27;
-        const s=new THREE.Mesh(gSeat,mCh);s.position.set(cx,0.46,cz);s.castShadow=true;tg.add(s);
-        const b=new THREE.Mesh(gBack,mBack);b.position.set(cx,0.72,cz+0.21);b.rotation.x=-0.12;b.castShadow=true;tg.add(b);
-        [[-0.18,-0.17],[0.18,-0.17],[-0.18,0.17],[0.18,0.17]].forEach(([a,c])=>{const l=new THREE.Mesh(gCl,mCl);l.position.set(cx+a,0.23,cz+c);tg.add(l);});
-        const u=new THREE.Mesh(gCl,mCl);u.scale.y=0.6;u.position.set(cx-0.17,0.6,cz+0.2);tg.add(u);const u2=u.clone();u2.position.x=cx+0.17;tg.add(u2);}
+        tg.add(box(0.4,0.33,0.035,mBlk,cx,h+0.36,-d/2+0.17));tg.add(box(0.36,0.29,0.004,mScr,cx,h+0.36,-d/2+0.19,false));}
+      if(S.chairs){ // chaise Rond'O T6 : assise 46 cm, hauteur 84,5 cm, 47 × 51,5 cm, hêtre multiplis, tube Ø25 gris alu
+        const cz=d/2+0.2,cg=new THREE.Group();cg.position.set(cx,0,cz);
+        const fx=0.2,fz=-0.2,bz=0.21;
+        [-fx,fx].forEach(x=>{tube(cg,mLeg,[x,0.01,fz],[x,0.44,fz],0.0125);tube(cg,mLeg,[x,0.01,bz+0.02],[x,0.44,bz],0.0125);
+          tube(cg,mLeg,[x,0.44,bz],[x*0.97,0.8,bz+0.05],0.0125);tube(cg,mLeg,[x,0.435,fz],[x,0.435,bz],0.0115);
+          [[fz],[bz+0.02]].forEach(([z])=>{const e=new THREE.Mesh(new THREE.CylinderGeometry(0.0135,0.0135,0.012,10),mFoot);e.position.set(x,0.006,z);cg.add(e);});});
+        tube(cg,mLeg,[-fx,0.435,fz+0.02],[fx,0.435,fz+0.02],0.0115);
+        const seat=rboxMesh(0.39,0.012,0.42,0.005,mCh,0,0.454,0.0);seat.castShadow=true;cg.add(seat);
+        const back=new THREE.Mesh(gBackRond,mChBack);back.position.set(0,0.72,bz+0.065-0.42);back.castShadow=true;cg.add(back);
+        tg.add(cg);}
     }
-    tg.userData={id:t.id,top};group.add(tg);tableMeshes.push(tg);
+    tg.userData={id:t.id,top,okColor:topOk};group.add(tg);tableMeshes.push(tg);
   });
   paint3DSel();
 }
 function paint3DSel(){
   if(!renderer)return;
   tableMeshes.forEach(tg=>{const t=S.tables.find(x=>x.id===tg.userData.id);if(!t)return;const m=tg.userData.top.material;
-    m.color.set(t._st==="bad"?css("--bad"):t._st==="warn"?css("--warn"):css("--table"));
-    m.emissive.set(sel.has(t.id)?css("--accent"):0x000000);m.emissiveIntensity=sel.has(t.id)?0.45:0;});
+    m.color.copy(lin(t._st==="bad"?css("--bad"):t._st==="warn"?css("--warn"):(tg.userData.okColor||css("--table"))));
+    m.emissive.copy(lin(sel.has(t.id)?css("--accent"):"#000000"));m.emissiveIntensity=sel.has(t.id)?0.45:0;});
   render3D();
 }
 function render3D(){
   if(!renderer)return;const c=camera.position;if(ceilGroup)ceilGroup.visible=c.y<S.room.H-0.05;
   walls.forEach(w=>{const v=[c.x-w.m[0],c.z-w.m[1]];const behind=v[0]*w.n[0]+v[1]*w.n[1]>0.05;
+    if(REAL()){w.g.visible=!behind;return;}w.g.visible=true;
     w.g.traverse(o=>{if(o.material){const b=o.material.userData.base??1;o.material.opacity=behind?Math.min(b,0.1):b;o.material.depthWrite=!behind;}});});
-  renderer.render(scene,camera);
+  if(REAL()&&composer)composer.render();else renderer.render(scene,camera);
 }
 function setCam(k){
   curCam=k;document.querySelectorAll("[data-cam]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.cam===k));
@@ -848,7 +943,7 @@ document.addEventListener("visibilitychange",()=>{if(document.visibilityState===
 
 syncInputs();evaluate();render2D();renderSide();
 pull(true);
-if(init3D()){build3D();resize3D();setCam("iso");}
+if(init3D()){if(!envTex){const b=document.querySelector('[data-q="real"]');b.disabled=true;b.title="Indisponible sur cet appareil";}applyQuality();setCam("iso");}
 })();
 </script>
 
