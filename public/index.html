@@ -274,15 +274,6 @@ kbd{font-family:var(--mono);font-size:11px;border:1px solid var(--line);border-b
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/environments/RoomEnvironment.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/lights/RectAreaLightUniformsLib.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/geometries/RoundedBoxGeometry.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/math/SimplexNoise.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/SSAOShader.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/GammaCorrectionShader.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/FXAAShader.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/MaskPass.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/SSAOPass.js"></script>
 <script>
 (function(){
 "use strict";
@@ -648,44 +639,31 @@ function init3D(){
   if(typeof THREE==="undefined"||!THREE.OrbitControls){$("#msg3d").textContent="La vue 3D n'a pas pu se charger (bibliothèque 3D indisponible). Le plan reste utilisable.";return false;}
   const wrap=$("#view3d");$("#msg3d").remove();
   renderer=new THREE.WebGLRenderer({antialias:true});renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,1.75));
-  renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+  renderer.shadowMap.enabled=false;
   wrap.appendChild(renderer.domElement);
   scene=new THREE.Scene();camera=new THREE.PerspectiveCamera(50,1,0.1,120);
   controls=new THREE.OrbitControls(camera,renderer.domElement);controls.maxPolarAngle=Math.PI*0.495;controls.minDistance=0.5;controls.maxDistance=40;
   controls.addEventListener("change",render3D);
   const hemi=new THREE.HemisphereLight(0xffffff,0x8a8078,0.75);scene.add(hemi);scene.userData.hemi=hemi;
   if(canReal()){try{THREE.RectAreaLightUniformsLib.init();const pm=new THREE.PMREMGenerator(renderer);envTex=pm.fromScene(new THREE.RoomEnvironment(),0.04).texture;pm.dispose();}catch(e){envTex=null;}}
-  const sun=new THREE.DirectionalLight(0xffffff,0.55);sun.position.set(3,8,-4);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);
+  const sun=new THREE.DirectionalLight(0xffffff,0.55);sun.position.set(3,8,-4);sun.castShadow=false;sun.shadow.mapSize.set(2048,2048);
   const sc=sun.shadow.camera;sc.left=-10;sc.right=10;sc.top=10;sc.bottom=-10;sc.near=0.5;sc.far=30;scene.add(sun);scene.add(sun.target);scene.userData.sun=sun;
   group=new THREE.Group();scene.add(group);
   new ResizeObserver(resize3D).observe(wrap);
   return true;
 }
-function resize3D(){if(!renderer)return;const w=$("#view3d").clientWidth,h=$("#view3d").clientHeight;if(!w||!h)return;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();
-  if(composer){composer.setSize(w,h);const pr=renderer.getPixelRatio();fxaa.uniforms.resolution.value.set(1/(w*pr),1/(h*pr));}render3D();}
+function resize3D(){if(!renderer)return;const w=$("#view3d").clientWidth,h=$("#view3d").clientHeight;if(!w||!h)return;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();render3D();}
 /* qualité du rendu : « Réaliste » = couleurs physiques, éclairage par les dalles LED et les fenêtres, reflets, occlusion ambiante */
 let quality=(()=>{try{return localStorage.getItem("salle-info-qualite")||"real";}catch(e){return "real";}})();
-let envTex=null,composer=null,ssao=null,fxaa=null;
-function canReal(){return !!(window.THREE&&THREE.RoomEnvironment&&THREE.RectAreaLightUniformsLib&&THREE.EffectComposer&&THREE.SSAOPass&&THREE.ShaderPass&&THREE.GammaCorrectionShader&&THREE.FXAAShader);}
+let envTex=null;
+function canReal(){return !!(window.THREE&&THREE.RoomEnvironment&&THREE.RectAreaLightUniformsLib);}
 function REAL(){return quality==="real"&&!!envTex;}
 function lin(c){const k=new THREE.Color(c);return REAL()?k.convertSRGBToLinear():k;}
-function setupComposer(){
-  if(composer||!REAL())return;
-  try{const w=$("#view3d").clientWidth||800,h=$("#view3d").clientHeight||500;
-    composer=new THREE.EffectComposer(renderer);
-    ssao=new THREE.SSAOPass(scene,camera,w,h);ssao.kernelRadius=0.5;ssao.minDistance=0.0015;ssao.maxDistance=0.08;composer.addPass(ssao);
-    composer.addPass(new THREE.ShaderPass(THREE.GammaCorrectionShader));
-    fxaa=new THREE.ShaderPass(THREE.FXAAShader);composer.addPass(fxaa);composer.setSize(w,h);
-    const pr=renderer.getPixelRatio();fxaa.uniforms.resolution.value.set(1/(w*pr),1/(h*pr));
-  }catch(e){composer=null;}
-}
 function applyQuality(){
   if(!renderer)return;const R=REAL();
   renderer.toneMapping=R?THREE.ACESFilmicToneMapping:THREE.NoToneMapping;renderer.toneMappingExposure=R?0.82:1;
   renderer.outputEncoding=R?THREE.sRGBEncoding:THREE.LinearEncoding;
-  renderer.shadowMap.type=R?THREE.PCFShadowMap:THREE.PCFSoftShadowMap;renderer.shadowMap.needsUpdate=true;
   scene.environment=R?envTex:null;camera.far=R?45:120;camera.updateProjectionMatrix();
-  if(R)setupComposer();
   document.querySelectorAll("[data-q]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.q===(R?"real":"std")));
   build3D();resize3D();
 }
@@ -872,7 +850,42 @@ function build3D(){
     }
     tg.userData={id:t.id,top,okColor:topOk};group.add(tg);tableMeshes.push(tg);
   });
+  group.add(floorShadows());
   paint3DSel();
+}
+/* Ombres au sol : une seule carte d'ombre douce pour toute la salle.
+   Les empreintes (plateaux, assises, pieds) sont dessinées puis floutées ensemble :
+   là où deux ombres se chevauchent, elles se fondent au lieu de s'additionner. */
+function floorShadows(){
+  const {L,D,sd}=S.room;const {w,d,n}=tDims();const legs=S.table.legs||"4";const PX=100,pad=0.5;
+  const W=Math.ceil((L+2*pad)*PX),Hh=Math.ceil((D+sd+2*pad)*PX);
+  const mk=()=>{const c=document.createElement("canvas");c.width=W;c.height=Hh;const g=c.getContext("2d");g.setTransform(PX,0,0,PX,pad*PX,pad*PX);g.fillStyle="#fff";return [c,g];};
+  const [cA,gA]=mk(),[cC,gC]=mk(),[cW,gW]=mk(); // A : ombre d'ambiance ; C : contact sous les pieds ; W : pied des murs
+  gW.strokeStyle="#fff";gW.lineWidth=0.14;gW.lineJoin="miter";gW.beginPath();poly().forEach((q,i)=>i?gW.lineTo(q[0],q[1]):gW.moveTo(q[0],q[1]));gW.closePath();gW.stroke();
+  const dot=(g,x,y,r)=>{g.beginPath();g.arc(x,y,r,0,Math.PI*2);g.fill();};
+  S.tables.forEach(t=>{
+    for(const g of [gA,gC]){g.save();g.translate(t.x,t.y);g.rotate(t.r*Math.PI/180);}
+    gA.fillRect(-w/2+0.04,-d/2+0.04,w-0.08,d-0.08);
+    if(legs==="4"){const ix=w/2-0.05,iz=d/2-0.05;[[-ix,-iz],[ix,-iz],[-ix,iz],[ix,iz]].forEach(([x,z])=>dot(gC,x,z,0.04));}
+    else[-1,1].forEach(sg=>{const px=sg*(w/2-Math.min(0.1,w*0.12));gC.fillRect(px-0.035,-d*0.47,0.07,d*0.94);});
+    if(S.chairs)for(let k=0;k<n;k++){const cx=-w/2+w*(k+0.5)/n,cz=d/2+0.2;
+      gA.fillRect(cx-0.19,cz-0.2,0.38,0.42);
+      [[-0.2,-0.2],[0.2,-0.2],[-0.2,0.23],[0.2,0.23]].forEach(([x,z])=>dot(gC,cx+x,cz+z,0.025));}
+    gA.restore();gC.restore();
+  });
+  const [cF,gF]=mk();gF.setTransform(1,0,0,1,0,0);gF.fillStyle="#000";gF.fillRect(0,0,W,Hh);
+  // flou par réduction puis agrandissement (fonctionne dans tous les navigateurs)
+  const soft=(src,f)=>{const t=document.createElement("canvas");t.width=Math.max(1,Math.round(W/f));t.height=Math.max(1,Math.round(Hh/f));
+    const g=t.getContext("2d");g.imageSmoothingEnabled=true;g.drawImage(src,0,0,t.width,t.height);return t;};
+  gF.globalCompositeOperation="lighten";gF.imageSmoothingEnabled=true;gF.imageSmoothingQuality="high";
+  gF.globalAlpha=0.28;gF.drawImage(soft(soft(cW,4),3),0,0,W,Hh);
+  gF.globalAlpha=0.42;gF.drawImage(soft(soft(cA,4),4),0,0,W,Hh);
+  gF.globalAlpha=0.7;gF.drawImage(soft(cC,4),0,0,W,Hh);
+  gF.globalAlpha=1;
+  const tex=new THREE.CanvasTexture(cF);
+  const m=new THREE.MeshBasicMaterial({color:0x000000,alphaMap:tex,transparent:true,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-2,polygonOffsetUnits:-2});
+  const pl=new THREE.Mesh(new THREE.PlaneGeometry(L+2*pad,D+sd+2*pad),m);pl.rotation.x=-Math.PI/2;pl.position.set(L/2,0.002,(D+sd)/2);pl.renderOrder=1;
+  pl.userData.shadow=true;return pl;
 }
 function paint3DSel(){
   if(!renderer)return;
@@ -886,7 +899,7 @@ function render3D(){
   walls.forEach(w=>{const v=[c.x-w.m[0],c.z-w.m[1]];const behind=v[0]*w.n[0]+v[1]*w.n[1]>0.05;
     if(REAL()){w.g.visible=!behind;return;}w.g.visible=true;
     w.g.traverse(o=>{if(o.material){const b=o.material.userData.base??1;o.material.opacity=behind?Math.min(b,0.1):b;o.material.depthWrite=!behind;}});});
-  if(REAL()&&composer)composer.render();else renderer.render(scene,camera);
+  renderer.render(scene,camera);
 }
 function setCam(k){
   curCam=k;document.querySelectorAll("[data-cam]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.cam===k));
