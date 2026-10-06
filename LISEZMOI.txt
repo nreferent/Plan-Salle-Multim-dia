@@ -1,0 +1,29 @@
+Aménagement salle info — version partagée pour Netlify
+=======================================================
+
+Toute personne qui a le lien voit la même disposition et peut la modifier pour tout le monde.
+Les 30 dernières versions sont gardées et peuvent être restaurées depuis la page (encadré « Sauvegarde »).
+
+Contenu
+- public/index.html               la page
+- netlify/functions/layout.mjs    le petit programme qui enregistre la disposition commune
+- netlify.toml, package.json      la configuration
+
+Mise en ligne (le simple glisser-déposer ne suffit pas : il ignore le programme d'enregistrement)
+
+Option A — avec GitHub (le plus simple à maintenir)
+1. Créez un dépôt GitHub et envoyez-y ce dossier tel quel.
+2. Sur Netlify : Add new site > Import an existing project > GitHub > choisissez le dépôt.
+3. Laissez les réglages proposés (ils viennent de netlify.toml) et cliquez sur Deploy.
+
+Option B — avec la ligne de commande Netlify (Node.js requis)
+1. Ouvrez un terminal dans ce dossier.
+2. npm install
+3. npx netlify-cli login
+4. npx netlify-cli deploy --prod   (choisissez « Create & configure a new project » la première fois)
+
+Aucune base de données à créer : le stockage (Netlify Blobs) est activé automatiquement.
+
+À savoir
+- Pas de mot de passe : quiconque a le lien peut modifier. Ne le diffusez qu'aux personnes concernées.
+- Si deux personnes enregistrent au même moment, la seconde voit un message et la disposition de la première s'affiche.
