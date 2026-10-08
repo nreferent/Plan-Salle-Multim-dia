@@ -114,7 +114,9 @@ kbd{font-family:var(--mono);font-size:11px;border:1px solid var(--line);border-b
 #plan .doorleaf{stroke:var(--wall);stroke-width:.03}
 #plan .dz{fill:url(#hatch);stroke:var(--muted);stroke-width:.008;stroke-dasharray:.04 .03;opacity:.8}
 #plan .rad{fill:var(--soft);stroke:var(--muted);stroke-width:.01}
-#plan .wb{stroke:var(--wb);stroke-width:.06}
+#plan .wb{stroke:var(--wb);stroke-width:.06;pointer-events:none}
+#plan .wbhit{stroke:var(--wb);stroke-opacity:0;stroke-width:.32;cursor:grab;touch-action:none}
+#plan .wbhit:hover{stroke-opacity:.15}
 #plan .lbl{font-family:var(--display);font-size:.15px;fill:var(--muted);letter-spacing:.012px;text-transform:uppercase}
 #plan .dim{stroke:var(--muted);stroke-width:.008;fill:none}
 #plan .dimt{font-family:var(--mono);font-size:.15px;fill:var(--ink)}
@@ -157,6 +159,17 @@ kbd{font-family:var(--mono);font-size:11px;border:1px solid var(--line);border-b
         <button id="pAdd" class="primary">+ Ajouter une table</button>
       </div>
       <p class="note">Les dispositions types placent automatiquement le maximum de tables qui respectent les passages. Déplacez-les ensuite à la main.</p>
+    </section>
+
+    <section class="box">
+      <h2>Tableau blanc</h2>
+      <div class="fields">
+        <label class="f" style="grid-column:1/-1">Mur<select id="wbWall"><option value="W">Mur ouest (emplacement actuel)</option><option value="N">Mur des fenêtres</option><option value="E">Mur de la double porte</option><option value="S">Mur des portes</option></select></label>
+        <label class="f" style="grid-column:1/-1"><span id="wbPosLbl">Centre du tableau</span><input type="range" id="wbPosR" step="0.05" min="0" max="5"></label>
+        <label class="f">Position (m)<input type="number" id="wbPos" step="0.05"></label>
+        <label class="f">Largeur (cm)<input type="number" id="wbW" step="5" min="60" max="400"></label>
+      </div>
+      <p class="note">Vous pouvez aussi faire glisser le tableau (trait orange) le long d'un mur sur le plan, ou l'amener sur un autre mur.</p>
     </section>
 
     <section class="box" id="selBox" hidden>
@@ -283,9 +296,9 @@ const fmt=(v,n=2)=>v.toFixed(n).replace(".",",");
 const snap=v=>Math.round(v/0.05)*0.05;
 const CHAIR=0.55;
 
-function defaults(){return {room:{L:7.2,D:5.35,H:2.7,sw:1.7,sd:2.5},table:{w:70,d:50,h:76,seats:1,legs:"4"},chairs:true,pcType:"aio",tables:[]};}
+function defaults(){return {wb:{wall:"W",c:2.565,w:1.67},room:{L:7.2,D:5.35,H:2.7,sw:1.7,sd:2.5},table:{w:70,d:50,h:76,seats:1,legs:"4"},chairs:true,pcType:"aio",tables:[]};}
 function pcOf(t){return t.pc||S.pcType||(S.pcs===false?"none":"tour");}
-let S; const sel=new Set(); let drag=null, band=null;
+let S; const sel=new Set(); let drag=null, band=null, wbDrag=null;
 const selTables=()=>S.tables.filter(t=>sel.has(t.id));
 function setSel(ids){sel.clear();ids.forEach(i=>sel.add(i));}
 
@@ -295,7 +308,7 @@ function feats(){
   const sdoors=[{a:1.10,b:2.00,name:"porte"},{a:2.37,b:3.27,name:"porte de sortie"}].filter(o=>o.b<xb-0.1);
   const dd={a:Math.min(2.86,D-1.4),b:Math.min(4.16,D-0.1)};
   const rads=[{a:3.14,b:4.10},{a:4.15,b:4.55}].filter(r=>r.b<L-0.7);
-  const wb={a:Math.min(1.73,D*0.3),b:Math.min(3.40,D-0.6)};
+  const wb=wbRange();
   const win={a:Math.min(2.0,L*0.3),b:L-0.1};
   // portes sud : ouverture vers l'extérieur, on garde 50 cm libres devant
   const zones=sdoors.map(o=>({name:o.name,x:o.a-0.05,y:D-0.5,w:o.b-o.a+0.1,h:0.5}));
@@ -323,6 +336,10 @@ function insideRoom(C){
   let inside2=true;for(let i=0;i<4;i++){const a=C[i],b=C[(i+1)%4];if((b[0]-a[0])*(v[1]-a[1])-(b[1]-a[1])*(v[0]-a[0])>0.001){inside2=false;break;}}
   return !(inside||inside2);
 }
+// tableau blanc : mur (W, N, E, S), centre mesuré depuis le coin nord (murs W et E) ou ouest (murs N et S), largeur
+function wbOf(){return S.wb||(S.wb={wall:"W",c:2.565,w:1.67});}
+function wbLen(wall){const {L,D,sw}=S.room;return wall==="N"?L:wall==="S"?L-sw:D;}
+function wbRange(){const b=wbOf();const len=wbLen(b.wall);const w=Math.min(b.w,len-0.1);const c=Math.min(Math.max(b.c,w/2+0.05),len-w/2-0.05);return {wall:b.wall,a:c-w/2,b:c+w/2,c,w};}
 function tDims(){return {w:S.table.w/100,d:S.table.d/100,h:S.table.h/100,n:+S.table.seats};}
 function tRect(t){const {w,d}=tDims();return rectC(t.x,t.y,t.r,w,d);}
 function cRect(t){const {w,d}=tDims();const a=t.r*Math.PI/180;const ly=d/2+CHAIR/2;return rectC(t.x-ly*Math.sin(a),t.y+ly*Math.cos(a),t.r,w,CHAIR);}
@@ -372,15 +389,19 @@ function presetCurrent(){
   return T;
 }
 function spread(span,size,gap){const n=Math.max(0,Math.floor((span+gap)/(size+gap)));const tot=n*size+Math.max(0,n-1)*gap;return {n,start:(span-tot)/2};}
+// repère « tableau à l'ouest » : les dispositions sont calculées comme si le tableau était sur le mur ouest, puis tournées
+function frame(){const {L,D}=S.room;const wall=wbOf().wall;
+  const T=wall==="E"?(x,y,r)=>[L-x,D-y,(r+180)%360]:wall==="N"?(x,y,r)=>[L-y,x,(r+90)%360]:wall==="S"?(x,y,r)=>[y,D-x,(r+270)%360]:(x,y,r)=>[x,y,r];
+  const side=wall==="N"||wall==="S";return {Lw:side?D:L,Dw:side?L:D,mkF:(x,y,r)=>{const [a,b,c]=T(x,y,r);return mk(a,b,c);}};}
 function presetRows(){
-  const {L,D}=S.room;const {w,d}=tDims();const F=feats();const out=[];
+  const {Lw:L,Dw:D,mkF}=frame();const {w,d}=tDims();const F=feats();const out=[];
   const yAvail=D-0.95;let best=[];
   for(let blk=1;blk<=6;blk++){const spans=[];let pos=0,k=0;
     while(pos+w<=yAvail+1e-6){spans.push(pos);pos+=w;k++;if(k%blk===0)pos+=0.85;}
     if(spans.length>best.length)best=spans;}
   const tot=best.length?best[best.length-1]+w:0;const y0=0.1+(yAvail-tot)/2;
   for(let x=1.6+d/2;x+d/2+CHAIR<=L-0.25;x+=d+CHAIR+0.55){
-    for(const s of best){const t=mk(x,y0+s+w/2,270);if(fits(t,out,F,S.room.D))out.push(t);}
+    for(const s of best){const t=mkF(x,y0+s+w/2,270);if(fits(t,out,F,S.room.D))out.push(t);}
   }return out;
 }
 function presetIslands(){
@@ -400,13 +421,13 @@ function presetIslands(){
   return b.length>a.length?b:a;
 }
 function presetU(){
-  const {L,D}=S.room;const {w,d}=tDims();const F=feats();const out=[];
+  const {Lw:L,Dw:D,mkF}=frame();const {w,d}=tDims();const F=feats();const out=[];const RD=S.room.D;
   const off=(S.chairs?CHAIR:0.3)+0.45;
   const ch=S.chairs?CHAIR:0.3;const yN=off+d/2,yS=D-0.55-ch-d/2;
-  let xE=L-off-d/2;for(let k=0;k<40&&!(fits(mk(xE,yN+w/2-d/2,270),[],F,D)&&fits(mk(xE,yS-w/2+d/2,270),[],F,D));k++)xE-=0.05;
+  let xE=L-off-d/2;for(let k=0;k<40&&!(fits(mkF(xE,yN+w/2-d/2,270),[],F,RD)&&fits(mkF(xE,yS-w/2+d/2,270),[],F,RD));k++)xE-=0.05;
   const yA=yN-d/2,yB=yS+d/2;const n=Math.floor((yB-yA)/w+1e-6);const st=yA+((yB-yA)-n*w)/2;
-  for(let i=0;i<n;i++){const t=mk(xE,st+i*w+w/2,270);if(fits(t,out,F,D))out.push(t);}
-  for(const [y,r] of [[yN,180],[yS,0]])for(let x=xE-d/2-w;x>=1.4;x-=w){const t=mk(x+w/2,y,r);if(fits(t,out,F,D))out.push(t);}
+  for(let i=0;i<n;i++){const t=mkF(xE,st+i*w+w/2,270);if(fits(t,out,F,RD))out.push(t);}
+  for(const [y,r] of [[yN,180],[yS,0]])for(let x=xE-d/2-w;x>=1.4;x-=w){const t=mkF(x+w/2,y,r);if(fits(t,out,F,RD))out.push(t);}
   return out;
 }
 function addTable(){
@@ -447,7 +468,8 @@ function render2D(){
   h+=`<polygon class="floor" points="${pts}"/><polygon points="${pts}" fill="url(#grid)"/>`;
   F.zones.forEach(z=>{h+=`<rect class="dz" x="${z.x}" y="${z.y}" width="${z.w}" height="${z.h}"/>`;});
   F.rads.forEach(r=>{h+=`<rect class="rad" x="${r.a}" y="0.02" width="${r.b-r.a}" height="0.1"/>`;});
-  h+=`<line class="wb" x1="0.04" y1="${F.wb.a}" x2="0.04" y2="${F.wb.b}"/>`;
+  {const B=F.wb,i=0.04;const seg=B.wall==="W"?[i,B.a,i,B.b]:B.wall==="E"?[L-i,B.a,L-i,B.b]:B.wall==="N"?[B.a,i,B.b,i]:[B.a,D-i,B.b,D-i];
+   h+=`<line class="wb" x1="${seg[0]}" y1="${seg[1]}" x2="${seg[2]}" y2="${seg[3]}"/><line class="wbhit" x1="${seg[0]}" y1="${seg[1]}" x2="${seg[2]}" y2="${seg[3]}"/>`;}
   // murs
   for(const s of wallSegs()){
     const o=outward(s);const off=[o.n[0]*0.05,o.n[1]*0.05];
@@ -466,7 +488,8 @@ function render2D(){
     h+=`<line class="doorleaf" x1="${L}" y1="${b}" x2="${L-hw}" y2="${b}"/><path class="door" d="M${L-hw} ${b} A${hw} ${hw} 0 0 1 ${L} ${b-hw}"/>`;}
   // libellés
   h+=`<text class="lbl" x="${(F.win.a+F.win.b)/2}" y="-0.16" text-anchor="middle">Fenêtres · radiateurs dessous</text>`;
-  h+=`<text class="lbl" transform="translate(0.22 ${(F.wb.a+F.wb.b)/2}) rotate(-90)" text-anchor="middle">Tableau blanc</text>`;
+  {const B=F.wb;const tr=B.wall==="W"?`translate(0.22 ${B.c}) rotate(-90)`:B.wall==="E"?`translate(${L-0.22} ${B.c}) rotate(90)`:B.wall==="N"?`translate(${B.c} 0.26)`:`translate(${B.c} ${D-0.38})`;
+   h+=`<text class="lbl" transform="${tr}" text-anchor="middle">Tableau blanc</text>`;}
   F.sdoors.forEach(o=>{h+=`<text class="lbl" x="${(o.a+o.b)/2}" y="${D-0.2}" text-anchor="middle">${o.name==="porte"?"Porte":"Sortie"}</text>`;});
   h+=`<text class="lbl" transform="translate(${L+0.27} ${(F.dd.a+F.dd.b)/2}) rotate(90)" text-anchor="middle">Double porte</text>`;
   h+=`<text class="lbl" x="${L-sw/2}" y="${D+sd-0.15}" text-anchor="middle">Vers l'accès</text>`;
@@ -499,6 +522,7 @@ function render2D(){
 function svgPt(e){const p=svg.createSVGPoint();p.x=e.clientX;p.y=e.clientY;return p.matrixTransform(svg.getScreenCTM().inverse());}
 svg.addEventListener("pointerdown",e=>{
   const multi=e.shiftKey||e.ctrlKey||e.metaKey;const g=e.target.closest(".tbl");const p=svgPt(e);
+  if(e.target.closest(".wbhit")){wbDrag={moved:false};svg.setPointerCapture(e.pointerId);e.preventDefault();return;}
   if(!g){ // cadre de sélection
     band={x0:p.x,y0:p.y,x1:p.x,y1:p.y,add:multi,base:new Set(sel),moved:false};
     svg.setPointerCapture(e.pointerId);return;}
@@ -511,6 +535,11 @@ svg.addEventListener("pointerdown",e=>{
 });
 svg.addEventListener("pointermove",e=>{
   const p=svgPt(e);
+  if(wbDrag){const {L,D,sw}=S.room;const xb=L-sw;const cand=[];
+    if(p.y<=D+0.3){cand.push(["W",Math.abs(p.x),p.y],["E",Math.abs(L-p.x),p.y]);}
+    cand.push(["N",Math.abs(p.y),p.x]);if(p.x<=xb+0.3)cand.push(["S",Math.abs(D-p.y),p.x]);
+    cand.sort((a,b)=>a[1]-b[1]);const [wall,,c]=cand[0];const b=wbOf();b.wall=wall;b.c=snap(c);const r=wbRange();b.c=+r.c.toFixed(2);
+    wbDrag.moved=true;render2D();syncWb();return;}
   if(band){band.x1=p.x;band.y1=p.y;band.moved=band.moved||Math.hypot(band.x1-band.x0,band.y1-band.y0)>0.08;
     let r=svg.querySelector(".band");if(!r){r=document.createElementNS("http://www.w3.org/2000/svg","rect");r.setAttribute("class","band");svg.appendChild(r);}
     r.setAttribute("x",Math.min(band.x0,band.x1));r.setAttribute("y",Math.min(band.y0,band.y1));r.setAttribute("width",Math.abs(band.x1-band.x0));r.setAttribute("height",Math.abs(band.y1-band.y0));return;}
@@ -520,6 +549,7 @@ svg.addEventListener("pointermove",e=>{
   drag.moved=dx!==0||dy!==0;evaluate();render2D();renderSide();
 });
 const endDrag=()=>{
+  if(wbDrag){const m=wbDrag.moved;wbDrag=null;if(m)refresh();return;}
   if(band){const b=band;band=null;
     if(!b.moved){if(!b.add)sel.clear();}
     else{const x0=Math.min(b.x0,b.x1),x1=Math.max(b.x0,b.x1),y0=Math.min(b.y0,b.y1),y1=Math.max(b.y0,b.y1);
@@ -544,17 +574,18 @@ function aiPrompts(){
   const pcF=[cT?`${cT} ordinateur${cT>1?"s":""} classique${cT>1?"s":""} (écran noir posé sur une unité centrale compacte noire)`:"",cA?`${cA} ordinateur${cA>1?"s":""} Lenovo ThinkCentre Tiny-in-One 22 (écran noir 21,5 pouces à bordures fines, pied noir réglable avec le mini-PC logé derrière)`:""].filter(Boolean).join(" et ");
   const pcE=[cT?`${cT} standard computer${cT>1?"s":""} (black monitor on a small black PC)`:"",cA?`${cA} Lenovo ThinkCentre Tiny-in-One 22 computer${cA>1?"s":""} (black 21.5-inch thin-bezel monitor on an adjustable black stand with the mini PC housed behind it)`:""].filter(Boolean).join(" and ");
   const face={W:0,N:0,E:0,S:0};S.tables.forEach(t=>{const a=t.r*Math.PI/180,fx=Math.sin(a),fy=-Math.cos(a);face[Math.abs(fx)>Math.abs(fy)?(fx<0?"W":"E"):(fy<0?"N":"S")]++;});
-  const nmF={W:"le tableau blanc",N:"les fenêtres",E:"la double porte",S:"le mur des deux portes"},nmE={W:"the whiteboard",N:"the windows",E:"the double door",S:"the wall with the two doors"};
+  const nmF={W:"le mur ouest",N:"les fenêtres",E:"la double porte",S:"le mur des deux portes"},nmE={W:"the west wall",N:"the windows",E:"the double door",S:"the wall with the two doors"};const bw=wbOf().wall;nmF[bw]="le tableau blanc";nmE[bw]="the whiteboard";
+  const wbF={W:"",N:" Déplace le tableau blanc sur le mur des fenêtres.",E:" Déplace le tableau blanc sur le mur de la double porte.",S:" Déplace le tableau blanc sur le mur des deux portes."}[bw],wbE={W:"",N:" Move the whiteboard to the window wall.",E:" Move the whiteboard to the double-door wall.",S:" Move the whiteboard to the wall with the two doors."}[bw];
   const fF=Object.keys(face).filter(k=>face[k]).map(k=>`${face[k]} table${face[k]>1?"s":""} où les élèves regardent ${nmF[k]}`).join(", ");
   const fE=Object.keys(face).filter(k=>face[k]).map(k=>`${face[k]} desk${face[k]>1?"s":""} where students face ${nmE[k]}`).join(", ");
   const lay=LAY[S.layout]&&!S.layoutMod?LAY[S.layout]:["disposition libre, à reproduire d'après le plan joint","custom layout, follow the attached floor plan"];
   const W=Math.round(w*100),Dd=Math.round(d*100),Hh=Math.round(h*100);
-  const fr=`Modifie la photo jointe de cette salle de classe. Garde exactement la pièce telle qu'elle est : même point de vue, mêmes murs, lambris marron et rideaux beiges devant les fenêtres, tableau blanc, affiches, portes, radiateurs, sol gris moucheté, plafond à dalles et éclairage. Enlève tout le mobilier actuel (tables, chaises, ordinateurs). `+
+  const fr=`Modifie la photo jointe de cette salle de classe. Garde exactement la pièce telle qu'elle est : même point de vue, mêmes murs, lambris marron et rideaux beiges devant les fenêtres, portes, radiateurs, sol gris moucheté, plafond à dalles et éclairage. Enlève tout le mobilier actuel (tables, chaises, ordinateurs) et toutes les affiches des murs.${wbF} `+
     `Installe à la place ${N} tables rectangulaires identiques de ${W} × ${Dd} cm (hauteur ${Hh} cm), plateau stratifié hêtre miel à chant assorti, 4 pieds en tube rond gris alu`+(pcF?`, avec ${pcF}, chacun avec un clavier plat noir et une souris filaire noire, à raison de ${n} poste${n>1?"s":""} par table équipée${cT&&cA?" (voir le plan joint pour savoir quelles tables ont des tout-en-un)":""}`:"")+(S.chairs?`, et ${N*n} chaises scolaires Rond'O (assise et dossier galbé en hêtre multiplis, 4 pieds en tube rond gris alu)`:"")+`. `+
-    `Disposition : ${lay[0]} (${fF}). La pièce mesure 7,20 m le long des fenêtres, 5,35 m le long du tableau et 2,70 m de haut : respecte cette échelle et garde des passages d'au moins 60 cm. Utilise le plan joint comme référence exacte pour l'emplacement de chaque table. Rendu photographique réaliste, même lumière que la photo d'origine, sans personnes ni texte ajouté.`;
-  const en=`Edit the attached photo of this classroom. Keep the room exactly as it is: same camera angle, same walls, brown wood panelling and beige curtains over the windows, whiteboard, posters, doors, radiators, speckled grey floor, tiled ceiling and lighting. Remove all existing furniture (desks, chairs, computers). `+
+    `Disposition : ${lay[0]} (${fF}). La pièce mesure 7,20 m le long des fenêtres, 5,35 m le long du mur ouest et 2,70 m de haut : respecte cette échelle et garde des passages d'au moins 60 cm. Utilise le plan joint comme référence exacte pour l'emplacement de chaque table. Rendu photographique réaliste, même lumière que la photo d'origine, sans personnes ni texte ajouté.`;
+  const en=`Edit the attached photo of this classroom. Keep the room exactly as it is: same camera angle, same walls, brown wood panelling and beige curtains over the windows, doors, radiators, speckled grey floor, tiled ceiling and lighting. Remove all existing furniture (desks, chairs, computers) and every poster from the walls.${wbE} `+
     `Replace it with ${N} identical rectangular desks, ${W} × ${Dd} cm (${Hh} cm high), honey beech laminate top with a matching edge, 4 round grey aluminium-coloured steel tube legs`+(pcE?`, with ${pcE}, each with a flat black keyboard and a black wired mouse, ${n} per equipped desk${cT&&cA?" (see the attached plan for which desks get all-in-ones)":""}`:"")+(S.chairs?`, and ${N*n} Rond'O school chairs (beech plywood seat and curved backrest, 4 round grey aluminium-coloured tube legs)`:"")+`. `+
-    `Layout: ${lay[1]} (${fE}). The room is 7.20 m along the windows, 5.35 m along the whiteboard wall and 2.70 m high: keep that scale and leave aisles of at least 60 cm. Use the attached floor plan as the exact reference for where each desk goes. Photorealistic result, same lighting as the original photo, no people, no added text.`;
+    `Layout: ${lay[1]} (${fE}). The room is 7.20 m along the windows, 5.35 m along the west wall and 2.70 m high: keep that scale and leave aisles of at least 60 cm. Use the attached floor plan as the exact reference for where each desk goes. Photorealistic result, same lighting as the original photo, no people, no added text.`;
   return {fr,en};
 }
 function renderSide(){
@@ -575,7 +606,11 @@ function renderSide(){
     $("#sPcLbl").textContent="Poste informatique de ces tables";const v=new Set(ts.map(t=>t.pc||""));$("#sPc").value=v.size===1?[...v][0]:"mixed";}
 }
 $("#alerts").addEventListener("click",e=>{const li=e.target.closest("li[data-id]");if(li){setSel([+li.dataset.id]);refresh(false);}});
-function syncInputs(){
+const WBLBL={W:"Centre du tableau, depuis le coin des fenêtres",E:"Centre du tableau, depuis le coin des fenêtres",N:"Centre du tableau, depuis le mur ouest",S:"Centre du tableau, depuis le mur ouest"};
+function syncWb(){const r=wbRange();$("#wbWall").value=r.wall;$("#wbPosLbl").textContent=WBLBL[r.wall];
+  const len=wbLen(r.wall);$("#wbPosR").min=(r.w/2+0.05).toFixed(2);$("#wbPosR").max=(len-r.w/2-0.05).toFixed(2);$("#wbPosR").value=r.c;
+  if(document.activeElement!==$("#wbPos"))$("#wbPos").value=r.c.toFixed(2);if(document.activeElement!==$("#wbW"))$("#wbW").value=Math.round(wbOf().w*100);}
+function syncInputs(){syncWb();
   $("#tW").value=S.table.w;$("#tD").value=S.table.d;$("#tH").value=S.table.h;$("#tS").value=S.table.seats;$("#tL").value=S.table.legs||"4";$("#chairs").checked=S.chairs;$("#pcType").value=S.pcType||(S.pcs===false?"none":"tour");
   $("#rL").value=S.room.L;$("#rD").value=S.room.D;$("#rH").value=S.room.H;$("#rSW").value=S.room.sw;$("#rSD").value=S.room.sd;
 }
@@ -584,6 +619,11 @@ function refresh(rebuild3d=true){evaluate();render2D();renderSide();save();if(re
 const num_=(id,min,max,def)=>{const v=parseFloat($(id).value);return isFinite(v)?Math.min(max,Math.max(min,v)):def;};
 ["#tW","#tD","#tH","#tS"].forEach(id=>$(id).addEventListener("change",()=>{
   S.table.w=num_("#tW",40,300,130);S.table.d=num_("#tD",30,200,60);S.table.h=num_("#tH",40,120,75);S.table.seats=num_("#tS",1,4,2);syncInputs();refresh();}));
+$("#wbWall").addEventListener("change",()=>{const b=wbOf();b.wall=$("#wbWall").value;b.c=wbLen(b.wall)/2;syncWb();refresh();});
+$("#wbPosR").addEventListener("input",()=>{wbOf().c=+$("#wbPosR").value;syncWb();render2D();});
+$("#wbPosR").addEventListener("change",()=>{refresh();});
+$("#wbPos").addEventListener("change",()=>{const v=parseFloat($("#wbPos").value);if(isFinite(v))wbOf().c=v;wbOf().c=+wbRange().c.toFixed(2);syncWb();refresh();});
+$("#wbW").addEventListener("change",()=>{const v=parseFloat($("#wbW").value);if(isFinite(v))wbOf().w=Math.min(4,Math.max(0.6,v/100));syncWb();refresh();});
 $("#tL").addEventListener("change",()=>{S.table.legs=$("#tL").value;refresh();});
 $("#bModel").onclick=()=>{S.table={w:70,d:50,h:76,seats:1,legs:"4"};S.chairs=true;S.pcType="aio";syncInputs();refresh();};
 $("#chairs").addEventListener("change",()=>{S.chairs=$("#chairs").checked;refresh();});
@@ -612,7 +652,7 @@ $("#pU").onclick=()=>{S.layout="U";S.layoutMod=false;S.tables=presetU();sel.clea
 $("#pClear").onclick=()=>{S.tables=[];sel.clear();refresh();};
 $("#pAdd").onclick=()=>{mod();const t=addTable();setSel([t.id]);refresh();};
 $("#bReset").onclick=()=>{S=defaults();S.layout="rows";S.tables=presetRows();sel.clear();syncInputs();refresh();setCam(curCam);};
-$("#bCopy").onclick=()=>{const txt=JSON.stringify({room:S.room,table:S.table,chairs:S.chairs,pcType:S.pcType,tables:S.tables.map(({id,x,y,r,pc})=>pc?{id,x,y,r,pc}:{id,x,y,r})});
+$("#bCopy").onclick=()=>{const txt=JSON.stringify({wb:wbOf(),room:S.room,table:S.table,chairs:S.chairs,pcType:S.pcType,tables:S.tables.map(({id,x,y,r,pc})=>pc?{id,x,y,r,pc}:{id,x,y,r})});
   const ok=()=>{$("#impMsg").textContent="Disposition copiée.";};
   const fb=()=>{$("#imp").value=txt;$("#imp").select();$("#impMsg").textContent="Texte sélectionné : copiez-le (Ctrl+C).";};
   try{navigator.clipboard.writeText(txt).then(ok,fb);}catch(e){fb();}};
@@ -739,7 +779,7 @@ function build3D(){
     const wp=(a,off)=>[s.p[0]+o.u[0]*a+o.n[0]*off,s.p[1]+o.u[1]*a+o.n[1]*off];
     const place=(a,b,y0,y1,m,th=0.1,inset=0.05)=>{if(b-a<0.001||y1-y0<0.001)return null;const c=(a+b)/2;const [x,z]=wp(c,inset);
       const mesh=box(b-a,y1-y0,th,m,x,(y0+y1)/2,z,false);mesh.rotation.y=ang;g.add(mesh);return mesh;};
-    const deco=(a,b,y0,y1,m,th=0.02)=>place(a,b,y0,y1,m,th,-th/2-0.003);
+    const deco=(a,b,y0,y1,m,th=0.02,extra=0)=>place(a,b,y0,y1,m,th,-th/2-0.003-extra);
     const at=(a,y,obj,off=0)=>{const [x,z]=wp(a,off);obj.position.set(x,y,z);obj.rotation.y=ang;g.add(obj);return obj;};
     const cuts=[0,o.len];s.ops.forEach(p=>cuts.push(p.a,p.b));cuts.sort((a,b)=>a-b);
     for(let i=0;i<cuts.length-1;i++){const a=cuts[i],b=cuts[i+1],mid=(a+b)/2;const op=s.ops.find(p=>mid>p.a&&mid<p.b);
@@ -769,22 +809,19 @@ function build3D(){
       if(op&&op.kind==="door")continue;deco(a+0.02,b-0.02,gy,gy+0.1,gM,0.05);
       for(let x=a+0.5;x<b-0.3;x+=1.2)deco(x,x+0.12,gy+0.02,gy+0.08,red,0.058);
       if(!op)deco(a,b,0,0.08,T(mat(0x9DB0B8)),0.012);}
-    // affiches et objets propres à chaque mur (d'après les photos)
-    const poster=(a,y,w,h,col)=>{deco(a-w/2,a+w/2,y-h/2,y+h/2,T(mat(0x151515,{roughness:0.6})),0.006);
-      const m=deco(a-w/2+0.03,a+w/2-0.03,y-h/2+0.05,y+h/2-0.03,T(mat(col,{roughness:0.55})),0.014);};
-    if(s.id==="W"){const A=y=>D-y;
-      const wbA=A(F.wb.b),wbB=A(F.wb.a);deco(wbA-0.03,wbB+0.03,1.04,2.1,T(mat(0xA7AEB2,{metalness:0.4,roughness:0.4})),0.02);deco(wbA,wbB,1.07,2.07,T(mat(0xFCFCFA,{roughness:0.15})),0.03);
-      deco(wbA+0.1,wbB-0.1,1.02,1.05,metal,0.07);
-      [[0.65,1.65,"#3A3530"],[1.42,2.07,"#7A5E93"],[1.58,1.38,"#4F7A45"],[4.13,1.5,"#5F6F55"],[4.78,2.06,"#8A3A22"]].forEach(([a,y,c])=>{if(a<D-0.3)poster(a,y,0.6,0.46,c);});}
-    if(s.id==="E"){poster(0.9,2.0,0.56,0.42,"#1E2B4A");poster(2.1,2.0,0.56,0.42,"#3C7C6C");
+    // tableau blanc (déplaçable) et objets propres à chaque mur
+    {const B=F.wb;if(s.id===B.wall){const toA=v=>s.id==="W"?D-v:s.id==="S"?xb-v:v;const a1=Math.min(toA(B.a),toA(B.b)),a2=Math.max(toA(B.a),toA(B.b));
+      const ex=(s.id==="N"&&a2>F.win.a&&a1<F.win.b)?0.13:0; // devant les rideaux s'il est posé sur les fenêtres
+      deco(a1-0.03,a2+0.03,1.04,2.1,T(mat(0xA7AEB2,{metalness:0.4,roughness:0.4})),0.02,ex);deco(a1,a2,1.07,2.07,T(mat(0xFCFCFA,{roughness:0.15})),0.03,ex);
+      deco(a1+0.1,a2-0.1,1.02,1.05,metal,0.07,ex);}}
+    if(s.id==="E"){
       const ca=F.dd.b+0.35;if(ca+0.5<D+sd-0.2){deco(ca,ca+0.5,1.35,2.0,T(mat(0x1E2A44,{roughness:0.8})),0.015);deco(ca,ca+0.5,1.93,1.97,T(mat(0xE3C23C)),0.018);}}
     if(s.id==="S"){const A=x=>xb-x;const sd0=F.sdoors.find(o=>o.name!=="porte");
       if(sd0){at(A((sd0.a+sd0.b)/2),2.28,box(0.3,0.1,0.05,T(mat(0x1D9A57,{emissive:0x1D9A57,emissiveIntensity:0.7})),0,0,0,false),-0.03);
-        at(A(sd0.b+0.12),1.45,box(0.09,0.09,0.05,red,0,0,0,false),-0.03);deco(A(sd0.b+0.55),A(sd0.b+0.35),1.5,1.8,T(mat(0xF0D34A)),0.004);}
+        at(A(sd0.b+0.12),1.45,box(0.09,0.09,0.05,red,0,0,0,false),-0.03);}
       const ext=new THREE.Group();const cyl=new THREE.Mesh(new THREE.CylinderGeometry(0.075,0.075,0.5,18),T(mat(0xC21F24,{roughness:0.4})));ext.add(cyl);
       ext.add(box(0.05,0.08,0.05,T(mat(0x222222)),0,0.29,0,false));at(A(0.6),1.1,ext,-0.09);
-      [[3.8,1.9],[4.3,1.7],[4.6,2.0],[5.0,1.8]].forEach(([x,y])=>{if(x<xb-0.3)deco(A(x+0.15),A(x-0.15),y-0.21,y+0.21,T(mat(0xF3F3F1)),0.004);});}
-    if(s.id==="BE"&&o.len>1.2){poster(o.len-0.5,1.7,0.5,0.66,"#2F7F86");}
+    }
     g.traverse(m=>{if(m.material)m.material.userData.base=m.material.opacity;});
     group.add(g);walls.push({g,m:o.m,n:o.n});
   }
@@ -916,7 +953,7 @@ new MutationObserver(rethemed).observe(document.documentElement,{attributes:true
 
 /* ---------- disposition commune (serveur Netlify) ---------- */
 const API="/api/layout";const remote={on:false,version:0,pending:false,applying:false,timer:null};
-function snapshot(){return {room:S.room,table:S.table,chairs:S.chairs,pcType:S.pcType,layout:S.layout,layoutMod:S.layoutMod,tables:S.tables.map(({id,x,y,r,pc})=>pc?{id,x,y,r,pc}:{id,x,y,r})};}
+function snapshot(){return {wb:wbOf(),room:S.room,table:S.table,chairs:S.chairs,pcType:S.pcType,layout:S.layout,layoutMod:S.layoutMod,tables:S.tables.map(({id,x,y,r,pc})=>pc?{id,x,y,r,pc}:{id,x,y,r})};}
 function shareStatus(txt,kind){const el=$("#shareStatus");el.textContent=txt;el.dataset.kind=kind||"";}
 function when(iso){try{return new Date(iso).toLocaleString("fr-FR",{weekday:"short",day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"});}catch(e){return "";}}
 function applyRemote(d){
